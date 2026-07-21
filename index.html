@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>English Practice</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 700px; margin: 40px auto; padding: 0 20px; background: #f7f7f8; }
+  h1 { font-size: 1.4rem; }
+  #recordBtn {
+    padding: 14px 28px; font-size: 1rem; border: none; border-radius: 8px;
+    background: #d64545; color: white; cursor: pointer;
+  }
+  #recordBtn.recording { background: #444; }
+  .msg { padding: 12px 16px; border-radius: 10px; margin: 10px 0; white-space: pre-wrap; }
+  .you { background: #dbeafe; }
+  .tutor { background: #e5e7eb; }
+  .status { color: #666; font-style: italic; }
+</style>
+</head>
+<body>
+  <h1>??? English Practice ? écoute &amp; expression orale</h1>
+  <p>Clique, parle en anglais, puis relâche pour envoyer.</p>
+  <button id="recordBtn">??? Maintenir pour parler</button>
+  <p id="status" class="status"></p>
+  <div id="conversation"></div>
+
+  <script>
+    // Same-origin : le frontend est servi par le même service FastAPI que l'API,
+    // donc pas besoin d'URL en dur (fonctionne aussi bien en local que sur HF Spaces).
+    const API_BASE = "";
+    const recordBtn = document.getElementById("recordBtn");
+    const statusEl = document.getElementById("status");
+    const conversationEl = document.getElementById("conversation");
+
+    let mediaRecorder;
+    let chunks = [];
+
+    function addMessage(text, who) {
+      const div = document.createElement("div");
+      div.className = "msg " + who;
+      div.textContent = text;
+      conversationEl.appendChild(div);
+      div.scrollIntoView({ behavior: "smooth" });
+    }
+
+    async function startRecording() {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder = new MediaRecorder(stream);
+      chunks = [];
+      mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
+      mediaRecorder.onstop = handleStop;
+      mediaRecorder.start();
+      recordBtn.classList.add("recording");
+      recordBtn.textContent = "?? Enregistrement... (relâche pour envoyer)";
+    }
+
+    function stopRecording() {
+      if (mediaRecorder && mediaRecorder.state !== "inactive") {
+        mediaRecorder.stop();
+      }
+      recordBtn.classList.remove("recording");
+      recordBtn.textContent = "??? Maintenir pour parler";
+    }
+
+    async function handleStop() {
+      const blob = new Blob(chunks, { type: "audio/webm" });
+      statusEl.textContent = "Transcription en cours...";
+
+      const formData = new FormData();
+      formData.append("audio", blob, "speech.webm");
+
+      try {
+        const transcribeRes = await fetch(`${API_BASE}/transcribe`, {
+          method: "POST",
+          body: formData,
+        });
+        const { text } = await transcribeRes.json();
+
+        if (!text) {
+          statusEl.textContent = "Rien entendu, réessaie.";
+          return;
+        }
+
+        addMessage(text, "you");
+        statusEl.textContent = "Le tuteur réfléchit... (peut prendre du temps sur CPU)";
+
+        const chatRes = await fetch(`${API_BASE}/chat`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text }),
+        });
+        const { raw } = await chatRes.json();
+
+        addMessage(raw, "tutor");
+        statusEl.textContent = "";
+      } catch (err) {
+        statusEl.textContent = "Erreur lors de l'appel à l'API.";
+        console.error(err);
+      }
+    }
+
+    recordBtn.addEventListener("mousedown", startRecording);
+    recordBtn.addEventListener("mouseup", stopRecording);
+    recordBtn.addEventListener("mouseleave", () => {
+      if (mediaRecorder && mediaRecorder.state === "recording") stopRecording();
+    });
+  </script>
+</body>
+</html>
