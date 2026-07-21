@@ -1,13 +1,12 @@
 ---
 title: English Practice
-emoji: ðŸ—£ï¸
+emoji: :)
 colorFrom: blue
 colorTo: red
 sdk: docker
 app_port: 7860
 pinned: false
 ---
-
 # English Practice â€” Tuteur d'anglais (Ã©coute + expression orale)
 
 Appli 100% open source : tu parles en anglais â†’ transcription (Whisper) â†’
