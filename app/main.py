@@ -1,9 +1,9 @@
 """
 Backend pour Hugging Face Space (Docker).
-Sert à la fois l'API (transcription + chat) et le frontend statique sur un seul port.
+Sert Ã  la fois l'API (transcription + chat) et le frontend statique sur un seul port.
 
 - /transcribe : audio -> texte (faster-whisper)
-- /chat       : texte -> correction + réponse (Mistral GGUF via llama-cpp-python)
+- /chat       : texte -> correction + rÃ©ponse (Mistral GGUF via llama-cpp-python)
 - /           : sert le frontend (static/index.html)
 """
 
@@ -25,8 +25,8 @@ app = FastAPI(title="English Practice API")
 WHISPER_MODEL_SIZE = os.environ.get("WHISPER_MODEL_SIZE", "small")
 whisper_model = WhisperModel(WHISPER_MODEL_SIZE, device="cpu", compute_type="int8")
 
-# --- LLM (Mistral, quantifié GGUF, via llama-cpp-python) ---
-# Modèle communautaire quantifié, léger et adapté au CPU.
+# --- LLM (Mistral, quantifiÃ© GGUF, via llama-cpp-python) ---
+# ModÃ¨le communautaire quantifiÃ©, lÃ©ger et adaptÃ© au CPU.
 LLM_REPO = os.environ.get("LLM_REPO", "TheBloke/Mistral-7B-Instruct-v0.2-GGUF")
 LLM_FILE = os.environ.get("LLM_FILE", "mistral-7b-instruct-v0.2.Q4_K_M.gguf")
 
@@ -97,5 +97,5 @@ async def health():
     }
 
 
-# Sert le frontend statique (doit être déclaré après les routes API)
+# Sert le frontend statique (doit Ãªtre dÃ©clarÃ© aprÃ¨s les routes API)
 app.mount("/", StaticFiles(directory="app/static", html=True), name="static")

@@ -2,6 +2,7 @@ name: Sync to Hugging Face
 on:
   push:
     branches: [main]
+  workflow_dispatch:  # permet de relancer manuellement depuis l'onglet Actions
 
 jobs:
   sync:
@@ -10,7 +11,9 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+          lfs: true
       - name: Push to HF Spaces
         run: |
+          git remote remove hf 2>/dev/null || true
           git remote add hf https://Kiba945:${{ secrets.HF_TOKEN }}@huggingface.co/spaces/Kiba945/english-pratice
           git push hf main --force

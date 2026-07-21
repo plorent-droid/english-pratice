@@ -18,14 +18,14 @@
 </style>
 </head>
 <body>
-  <h1>??? English Practice ? écoute &amp; expression orale</h1>
-  <p>Clique, parle en anglais, puis relâche pour envoyer.</p>
+  <h1>??? English Practice ? Ã©coute &amp; expression orale</h1>
+  <p>Clique, parle en anglais, puis relÃ¢che pour envoyer.</p>
   <button id="recordBtn">??? Maintenir pour parler</button>
   <p id="status" class="status"></p>
   <div id="conversation"></div>
 
   <script>
-    // Same-origin : le frontend est servi par le même service FastAPI que l'API,
+    // Same-origin : le frontend est servi par le mÃªme service FastAPI que l'API,
     // donc pas besoin d'URL en dur (fonctionne aussi bien en local que sur HF Spaces).
     const API_BASE = "";
     const recordBtn = document.getElementById("recordBtn");
@@ -51,7 +51,7 @@
       mediaRecorder.onstop = handleStop;
       mediaRecorder.start();
       recordBtn.classList.add("recording");
-      recordBtn.textContent = "?? Enregistrement... (relâche pour envoyer)";
+      recordBtn.textContent = "?? Enregistrement... (relÃ¢che pour envoyer)";
     }
 
     function stopRecording() {
@@ -77,12 +77,12 @@
         const { text } = await transcribeRes.json();
 
         if (!text) {
-          statusEl.textContent = "Rien entendu, réessaie.";
+          statusEl.textContent = "Rien entendu, rÃ©essaie.";
           return;
         }
 
         addMessage(text, "you");
-        statusEl.textContent = "Le tuteur réfléchit... (peut prendre du temps sur CPU)";
+        statusEl.textContent = "Le tuteur rÃ©flÃ©chit... (peut prendre du temps sur CPU)";
 
         const chatRes = await fetch(`${API_BASE}/chat`, {
           method: "POST",
@@ -94,7 +94,7 @@
         addMessage(raw, "tutor");
         statusEl.textContent = "";
       } catch (err) {
-        statusEl.textContent = "Erreur lors de l'appel à l'API.";
+        statusEl.textContent = "Erreur lors de l'appel Ã  l'API.";
         console.error(err);
       }
     }
